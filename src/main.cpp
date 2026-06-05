@@ -9,13 +9,15 @@
 #include "Screens.h"
 #include "Settings.h"
 #include "Storage.h"
-#include "UsageClient.h"
+#include "Provider.h"
+#include "providers/ClaudeProvider.h"
 
 #include <ESP8266WebServer.h>     // portal lives inline; ESP8266-only for now
 #include <DNSServer.h>
 
 static Storage     storage;
-static UsageClient usageClient;
+static ClaudeProvider claudeProvider;
+static Provider*      activeProvider = &claudeProvider;
 static Settings    settings;
 static UsageStatus status;
 static char        lastError[32] = "";
@@ -45,7 +47,7 @@ static void syncClock() {
 
 static void refresh() {
     if (WiFi.status() != WL_CONNECTED) connectWifi();
-    status = usageClient.fetch(String(settings.token.c_str()), lastError, sizeof(lastError));
+    status = activeProvider->fetch(String(settings.token.c_str()), lastError, sizeof(lastError));
     lastFetchMs = millis();
 }
 

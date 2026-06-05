@@ -1,4 +1,4 @@
-#include "UsageClient.h"
+#include "ClaudeProvider.h"
 
 #if defined(ESP8266)
   #include <ESP8266WiFi.h>
@@ -37,7 +37,7 @@ HMUfpIBvFSDJ3gyICh3WZlXi/EjJKSZp4A==
 
 static const char* ENDPOINT = "https://api.anthropic.com/v1/messages";
 
-UsageStatus UsageClient::fetch(const String& token, char* errOut, size_t errLen) {
+UsageStatus ClaudeProvider::fetch(const String& token, char* errOut, size_t errLen) {
     UsageStatus bad;
 
 #if defined(ESP8266)
