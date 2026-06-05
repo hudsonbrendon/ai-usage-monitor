@@ -37,7 +37,7 @@ jobs:
         run: |
           mkdir -p dist
           cp .pio/build/ideaspark/firmware.bin \
-             "dist/claude-usage-monitor-ideaspark-${{ github.ref_name }}.bin"
+             "dist/ai-usage-monitor-ideaspark-${{ github.ref_name }}.bin"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -52,7 +52,7 @@ jobs:
             ```bash
             esptool.py --chip esp8266 --baud 460800 write_flash \
               --flash_mode dio --flash_freq 40m --flash_size detect \
-              0x0 claude-usage-monitor-ideaspark-${{ github.ref_name }}.bin
+              0x0 ai-usage-monitor-ideaspark-${{ github.ref_name }}.bin
             ```
 
             On first boot the device opens the `ClaudeUsage-XXXX` Wi-Fi AP — see the README for setup.
