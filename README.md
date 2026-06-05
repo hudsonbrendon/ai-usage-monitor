@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="AI Usage Monitor" width="480">
+  <img src="assets/preview.png" alt="AI Usage Monitor" width="480">
 </p>
 
 <h1 align="center">AI Usage Monitor</h1>
