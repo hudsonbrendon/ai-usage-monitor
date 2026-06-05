@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            ~/.cache/pip
+          key: pio-${{ runner.os }}-${{ hashFiles('platformio.ini') }}
+          restore-keys: pio-${{ runner.os }}-
+
+      - name: Install PlatformIO
+        run: pip install --upgrade platformio
+
+      - name: Build firmware
+        run: pio run -e ideaspark
+
+      - name: Stage release artifact
+        run: |
+          mkdir -p dist
+          cp .pio/build/ideaspark/firmware.bin \
+             "dist/claude-usage-monitor-ideaspark-${{ github.ref_name }}.bin"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.bin
+          generate_release_notes: true
+          body: |
+            ### Flash (ideaspark ESP8266)
+
+            Download the `.bin` below and flash at offset `0x0` with esptool:
+
+            ```bash
+            esptool.py --chip esp8266 --baud 460800 write_flash \
+              --flash_mode dio --flash_freq 40m --flash_size detect \
+              0x0 claude-usage-monitor-ideaspark-${{ github.ref_name }}.bin
+            ```
+
+            On first boot the device opens the `ClaudeUsage-XXXX` Wi-Fi AP — see the README for setup.
