@@ -23,11 +23,15 @@ public:
     void poll() override {
         bool down = (digitalRead(0) == LOW);
         uint32_t now = millis();
-        if (down && !_prev) { _downAt = now; _longFired = false; }
-        else if (down && _prev) {
-            if (!_longFired && now - _downAt >= 600) { _long = true; _longFired = true; }
+        // Gestures fire on RELEASE by duration, so a continuous 5 s hold can reach
+        // the factory-reset check (held()) without the long-press refresh firing
+        // mid-hold: <600ms = tap, 600ms..5s = long-press, >=5s handled by held().
+        if (down && !_prev) {
+            _downAt = now;
         } else if (!down && _prev) {
-            if (!_longFired && now - _downAt < 600) _tap = true;
+            uint32_t dur = now - _downAt;
+            if (dur < 600)       _tap = true;
+            else if (dur < 5000) _long = true;
         }
         _prev = down;
     }
@@ -40,7 +44,7 @@ public:
 
 private:
     MonoCanvas _canvas;
-    bool _prev = false, _tap = false, _long = false, _longFired = false;
+    bool _prev = false, _tap = false, _long = false;
     uint32_t _downAt = 0;
 };
 
