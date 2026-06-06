@@ -10,6 +10,7 @@ struct Settings {
     std::string codexToken;       // Codex access_token (~/.codex/auth.json)
     std::string codexAccountId;   // Codex account_id
     uint16_t    pollSeconds = 120;
+    uint8_t     alertPercent = 80;   // warn at/over this % (0 = alerts off)
     bool        configured   = false;
 };
 

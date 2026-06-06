@@ -45,6 +45,16 @@ void test_configured_requires_a_provider(void) {
     TEST_ASSERT_TRUE(settingsFromJson("{\"ssid\":\"N\"}", b));
     TEST_ASSERT_FALSE(b.configured);
 }
+void test_alert_percent_roundtrip(void) {
+    Settings a; a.ssid="N"; a.token="t"; a.alertPercent=90;
+    char buf[512]; TEST_ASSERT_TRUE(settingsToJson(a, buf, sizeof(buf)));
+    Settings b; TEST_ASSERT_TRUE(settingsFromJson(buf, b));
+    TEST_ASSERT_EQUAL_UINT8(90, b.alertPercent);
+}
+void test_alert_percent_default(void) {
+    Settings b; TEST_ASSERT_TRUE(settingsFromJson("{\"ssid\":\"N\",\"token\":\"t\"}", b));
+    TEST_ASSERT_EQUAL_UINT8(80, b.alertPercent);
+}
 void setUp(void) {}
 void tearDown(void) {}
 int main(int, char**) {
@@ -55,5 +65,7 @@ int main(int, char**) {
     RUN_TEST(test_default_poll_when_absent);
     RUN_TEST(test_codex_roundtrip);
     RUN_TEST(test_configured_requires_a_provider);
+    RUN_TEST(test_alert_percent_roundtrip);
+    RUN_TEST(test_alert_percent_default);
     return UNITY_END();
 }

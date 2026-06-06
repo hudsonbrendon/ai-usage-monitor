@@ -9,6 +9,7 @@ bool settingsToJson(const Settings& s, char* out, size_t outLen) {
     doc["codexToken"] = s.codexToken;
     doc["codexAccountId"] = s.codexAccountId;
     doc["pollSeconds"] = s.pollSeconds;
+    doc["alertPercent"] = s.alertPercent;
     size_t n = serializeJson(doc, out, outLen);
     return n > 0 && n < outLen;
 }
@@ -22,6 +23,7 @@ bool settingsFromJson(const char* json, Settings& s) {
     s.codexToken    = doc["codexToken"]    | "";
     s.codexAccountId= doc["codexAccountId"]| "";
     s.pollSeconds   = doc["pollSeconds"]   | (uint16_t)120;
+    s.alertPercent  = doc["alertPercent"]  | (uint8_t)80;
     bool hasClaude = !s.token.empty();
     bool hasCodex  = !s.codexToken.empty() && !s.codexAccountId.empty();
     s.configured = !s.ssid.empty() && (hasClaude || hasCodex);
