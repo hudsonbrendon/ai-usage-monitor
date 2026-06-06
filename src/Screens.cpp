@@ -64,7 +64,7 @@ void connecting(Canvas& c, const char* ssid) {
     c.present();
 }
 
-void dashboard(Canvas& c, const char* provider, const UsageStatus& u, uint32_t now, int rssi, int secsAgo) {
+void dashboard(Canvas& c, const char* provider, const UsageStatus& u, uint32_t now, int rssi, int secsAgo, uint8_t alertPercent) {
     c.clear();
     int W = c.width();
     Scale lbl = (W >= 100) ? Scale::Medium : Scale::Small;
@@ -73,16 +73,18 @@ void dashboard(Canvas& c, const char* provider, const UsageStatus& u, uint32_t n
 
     // Row 1 — 5H
     int y = 0;
-    snprintf(line, sizeof(line), "5H %.0f%%", u.h5Percent);
-    c.text(2, y, lbl, Ink::Fg, line);
+    bool h5alert = alertPercent > 0 && u.h5Percent >= (float)alertPercent;
+    snprintf(line, sizeof(line), "%s5H %.0f%%", h5alert ? "!" : "", u.h5Percent);
+    c.text(2, y, lbl, h5alert ? Ink::Warn : Ink::Fg, line);
     formatCountdown(u.h5Reset, now, rst, sizeof(rst));
     rightText(c, W - 2, y, lbl, Ink::Dim, rst);
     bar(c, 2, y + lh, W - 4, 7, u.h5Percent);
 
     // Row 2 — 7D
     y += lh + 11;
-    snprintf(line, sizeof(line), "7D %.0f%%", u.d7Percent);
-    c.text(2, y, lbl, Ink::Fg, line);
+    bool d7alert = alertPercent > 0 && u.d7Percent >= (float)alertPercent;
+    snprintf(line, sizeof(line), "%s7D %.0f%%", d7alert ? "!" : "", u.d7Percent);
+    c.text(2, y, lbl, d7alert ? Ink::Warn : Ink::Fg, line);
     formatCountdown(u.d7Reset, now, rst, sizeof(rst));
     rightText(c, W - 2, y, lbl, Ink::Dim, rst);
     bar(c, 2, y + lh, W - 4, 7, u.d7Percent);

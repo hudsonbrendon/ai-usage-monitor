@@ -69,7 +69,7 @@ static void refresh() {
 static void draw() {
     if (status.valid)
         Screens::dashboard(Board().canvas(), providers[activeIdx]->id(), status, nowEpoch(),
-                            WiFi.RSSI(), (int)((millis() - lastFetchMs) / 1000));
+                            WiFi.RSSI(), (int)((millis() - lastFetchMs) / 1000), settings.alertPercent);
     else
         Screens::error(Board().canvas(), "API ERROR", lastError);
 }
@@ -94,6 +94,8 @@ color:#15161a;font-weight:700}</style></head><body><div class=c><h1>AI Usage Mon
 <input name=codexAccountId maxlength=64 placeholder="(optional)">
 <label>Refresh</label><select name=poll><option value=60>60 s</option>
 <option value=120 selected>2 min</option><option value=300>5 min</option></select>
+<label>Alert at % (0 = off)</label>
+<input name=alertPercent type=number min=0 max=100 value=80>
 <button type=submit>Save & restart</button></form></div></body></html>)HTML";
 
 static void runPortalAndReboot() {
@@ -120,6 +122,8 @@ static void runPortalAndReboot() {
         s.codexAccountId = server.arg("codexAccountId").c_str();
         long p = server.arg("poll").toInt();
         s.pollSeconds = (p >= 30 && p <= 600) ? (uint16_t)p : 120;
+        long ap = server.arg("alertPercent").toInt();
+        s.alertPercent = (ap >= 0 && ap <= 100) ? (uint8_t)ap : 80;
         bool hasClaude = !s.token.empty();
         bool hasCodex  = !s.codexToken.empty() && !s.codexAccountId.empty();
         s.configured = !s.ssid.empty() && (hasClaude || hasCodex);
@@ -187,6 +191,14 @@ void loop() {
 
     uint32_t pollMs = (uint32_t)settings.pollSeconds * 1000u;
     if (millis() - lastFetchMs >= pollMs) refresh();
+
+    static unsigned long lastBlink = 0;
+    static bool ledOn = false;
+    if (overThreshold(status, settings.alertPercent)) {
+        if (millis() - lastBlink > 400) { ledOn = !ledOn; Board().led(ledOn); lastBlink = millis(); }
+    } else if (ledOn) {
+        ledOn = false; Board().led(false);
+    }
 
     static unsigned long lastDraw = 0;
     if (screenOn && millis() - lastDraw > 5000) { draw(); lastDraw = millis(); }
