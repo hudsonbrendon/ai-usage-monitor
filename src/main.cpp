@@ -63,6 +63,11 @@ static void syncClock() {
 static void refresh() {
     if (WiFi.status() != WL_CONNECTED) connectWifi();
     status = providers[activeIdx]->fetch(settings, lastError, sizeof(lastError));
+    String rotated;
+    if (codexProvider.takeRotatedRefreshToken(rotated)) {
+        settings.codexRefreshToken = rotated.c_str();
+        storage.save(settings);
+    }
     lastFetchMs = millis();
 }
 
@@ -92,6 +97,8 @@ color:#15161a;font-weight:700}</style></head><body><div class=c><h1>AI Usage Mon
 <textarea name=codexToken rows=4 placeholder="(optional) paste the long access_token here"></textarea>
 <label>Codex account id</label>
 <input name=codexAccountId maxlength=64 placeholder="(optional)">
+<label>Codex refresh token (auto-renews; from ~/.codex/auth.json)</label>
+<textarea name=codexRefreshToken rows=3 placeholder="(optional, recommended)"></textarea>
 <label>Refresh</label><select name=poll><option value=60>60 s</option>
 <option value=120 selected>2 min</option><option value=300>5 min</option></select>
 <label>Alert at % (0 = off)</label>
@@ -120,12 +127,13 @@ static void runPortalAndReboot() {
         s.token = server.arg("token").c_str();
         s.codexToken = server.arg("codexToken").c_str();
         s.codexAccountId = server.arg("codexAccountId").c_str();
+        s.codexRefreshToken = server.arg("codexRefreshToken").c_str();
         long p = server.arg("poll").toInt();
         s.pollSeconds = (p >= 30 && p <= 600) ? (uint16_t)p : 120;
         long ap = server.arg("alertPercent").toInt();
         s.alertPercent = (ap >= 0 && ap <= 100) ? (uint8_t)ap : 80;
         bool hasClaude = !s.token.empty();
-        bool hasCodex  = !s.codexToken.empty() && !s.codexAccountId.empty();
+        bool hasCodex  = !s.codexAccountId.empty() && (!s.codexToken.empty() || !s.codexRefreshToken.empty());
         s.configured = !s.ssid.empty() && (hasClaude || hasCodex);
         if (!s.configured) { server.send(400, "text/plain", "need wifi + at least one provider"); return; }
         if (!storage.save(s)) { server.send(500, "text/plain", "save failed"); return; }
