@@ -36,6 +36,19 @@ UsageStatus parseCodexUsage(const char* json) {
     return s;
 }
 
+OAuthToken parseOAuthToken(const char* json) {
+    OAuthToken t;
+    JsonDocument doc;
+    if (deserializeJson(doc, json)) return t;
+    const char* at = doc["access_token"] | "";
+    if (at[0] == '\0') return t;
+    t.accessToken  = at;
+    t.refreshToken = doc["refresh_token"] | "";
+    t.expiresIn    = doc["expires_in"] | (uint32_t)0;
+    t.ok = true;
+    return t;
+}
+
 bool overThreshold(const UsageStatus& u, uint8_t pct) {
     if (!u.valid || pct == 0) return false;
     return u.h5Percent >= (float)pct || u.d7Percent >= (float)pct;

@@ -67,6 +67,20 @@ void test_over_threshold_weekly(void) { UsageStatus u; u.valid=true; u.h5Percent
 void test_over_threshold_under(void) { UsageStatus u; u.valid=true; u.h5Percent=50; u.d7Percent=50; TEST_ASSERT_FALSE(overThreshold(u,80)); }
 void test_over_threshold_disabled(void) { UsageStatus u; u.valid=true; u.h5Percent=99; u.d7Percent=99; TEST_ASSERT_FALSE(overThreshold(u,0)); }
 void test_over_threshold_invalid(void) { UsageStatus u; u.valid=false; u.h5Percent=99; TEST_ASSERT_FALSE(overThreshold(u,80)); }
+void test_oauth_parse_typical(void) {
+    const char* j = "{\"access_token\":\"AT123\",\"token_type\":\"Bearer\",\"expires_in\":604800,\"refresh_token\":\"RT456\"}";
+    OAuthToken t = parseOAuthToken(j);
+    TEST_ASSERT_TRUE(t.ok);
+    TEST_ASSERT_EQUAL_STRING("AT123", t.accessToken.c_str());
+    TEST_ASSERT_EQUAL_STRING("RT456", t.refreshToken.c_str());
+    TEST_ASSERT_EQUAL_UINT32(604800u, t.expiresIn);
+}
+void test_oauth_parse_no_rotation(void) {
+    OAuthToken t = parseOAuthToken("{\"access_token\":\"AT\",\"expires_in\":3600}");
+    TEST_ASSERT_TRUE(t.ok); TEST_ASSERT_EQUAL_STRING("", t.refreshToken.c_str()); TEST_ASSERT_EQUAL_UINT32(3600u, t.expiresIn);
+}
+void test_oauth_parse_error(void) { OAuthToken t = parseOAuthToken("{\"error\":\"invalid_grant\"}"); TEST_ASSERT_FALSE(t.ok); }
+void test_oauth_parse_malformed(void) { OAuthToken t = parseOAuthToken("{nope"); TEST_ASSERT_FALSE(t.ok); }
 void setUp(void) {}
 void tearDown(void) {}
 int main(int, char**) {
@@ -88,5 +102,9 @@ int main(int, char**) {
     RUN_TEST(test_over_threshold_under);
     RUN_TEST(test_over_threshold_disabled);
     RUN_TEST(test_over_threshold_invalid);
+    RUN_TEST(test_oauth_parse_typical);
+    RUN_TEST(test_oauth_parse_no_rotation);
+    RUN_TEST(test_oauth_parse_error);
+    RUN_TEST(test_oauth_parse_malformed);
     return UNITY_END();
 }

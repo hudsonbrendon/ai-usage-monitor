@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <cstdint>
 #include <cstddef>
 
@@ -24,3 +25,12 @@ void formatCountdown(uint32_t epoch, uint32_t now, char* out, size_t outLen);
 
 // True if usage is valid, pct > 0, and either window is at/over pct (0..100).
 bool overThreshold(const UsageStatus& u, uint8_t pct);
+
+struct OAuthToken {
+    std::string accessToken;
+    std::string refreshToken;   // empty if the server didn't rotate it
+    uint32_t    expiresIn = 0;  // seconds
+    bool        ok = false;
+};
+// Parse a standard OAuth2 token response (access_token, expires_in, refresh_token).
+OAuthToken parseOAuthToken(const char* json);
