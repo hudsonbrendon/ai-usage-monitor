@@ -31,6 +31,7 @@ button**.
 
 - 📊 **Two live windows** — rolling **5‑hour** and **weekly** rate‑limit utilization as on‑screen bars with exact percentages.
 - ⏳ **Reset countdowns** — see exactly when each window refills (`2h05m`, `3d4h`).
+- 🚨 **Threshold alerts** — blink the LED and flag the screen when a window crosses a configurable % (default 80).
 - 🔀 **Multi‑provider** — **Claude (Anthropic)** and **Codex (OpenAI)** today; tap the button to switch between them on the same device.
 - 📶 **Two‑minute setup** — a captive Wi‑Fi portal asks for your network and tokens; nothing is hardcoded, nothing is soldered.
 - 🧩 **Pluggable by design** — a `Provider` seam makes new AI services additive, and a `Canvas`/`IBoard` seam makes new boards/displays additive.
@@ -103,7 +104,7 @@ Full walkthrough, including the macOS CH340 driver note, is in [Installation](do
 2. Join it and open **`http://192.168.4.1`**.
 3. Enter your 2.4 GHz Wi‑Fi and at least one provider's credentials:
    - **Claude** — the token from `claude setup-token`.
-   - **Codex** — the `access_token` and `account_id` from `~/.codex/auth.json` (`jq -r '.tokens.access_token' ~/.codex/auth.json`).
+   - **Codex** — the `account_id` plus either the `access_token` or, recommended, the `refresh_token` (auto-renews, no weekly re-paste) from `~/.codex/auth.json`.
 4. Save — it reboots and starts showing your usage.
 
 The full setup guide is in [Usage](docs/USAGE.md).

@@ -93,7 +93,13 @@ The JSON response body contains a `rate_limit` object with two sub-objects:
 ### Caveats
 
 - **Unofficial endpoint.** `backend-api/codex/usage` is undocumented and not part of any public API contract. OpenAI may change or remove it without notice. If the provider stops working after an OpenAI update, check the response structure first.
-- **Short-lived access token.** The `access_token` expires in approximately **7 days**. You will need to re-extract it from `~/.codex/auth.json` and re-enter it in the web UI periodically. An automatic refresh flow is a possible future feature but is not currently implemented.
+- **Short-lived access token.** The static `access_token` expires in approximately **7 days**.
+
+### Auto-refresh (recommended)
+
+Instead of the static access token, paste the **refresh token** (`jq -r '.tokens.refresh_token' ~/.codex/auth.json`, ~340 chars) into the portal's **Codex refresh token** field. The device then renews its access token on its own by calling `POST https://auth.openai.com/oauth/token` (`grant_type=refresh_token`), so you never re-paste. It also auto-retries once if a token goes stale mid-session.
+
+**Trade-off — token rotation.** OpenAI rotates the refresh token on every renewal: each refresh returns a *new* refresh token and invalidates the previous one. The device persists each new token to its own flash, so it keeps working. But because your Codex CLI started from the same token, **whichever side refreshes last invalidates the other** — so the device and an actively-used Codex CLI can't both stay logged in from one token indefinitely. For a dedicated desk monitor this is usually fine; if your CLI later reports an auth error, just run `codex login` again. (The static access-token mode does not rotate, but it expires in ~7 days.)
 
 ---
 

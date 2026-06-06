@@ -53,6 +53,15 @@ jq -r '.tokens.account_id' ~/.codex/auth.json
 
 The access token is very long (~1900 characters). The portal's **Codex token** field is a multi-line textarea specifically to accommodate it — the easiest approach is to copy and paste it on the same computer where you ran the command above.
 
+**Recommended: use the refresh token instead.** The access token expires in ~7 days. If you instead paste the **refresh token** into the portal's **Codex refresh token** field, the device renews its own access token automatically — no weekly re-paste:
+
+```bash
+# Refresh token (~340 characters) — paste this into "Codex refresh token"
+jq -r '.tokens.refresh_token' ~/.codex/auth.json
+```
+
+When you use the refresh token you can leave the **Codex token** field blank. See [Providers → Codex](PROVIDERS.md) for the trade-off (the device and your Codex CLI rotate the same token, so they can't both stay logged in indefinitely).
+
 Paste the access token into **Codex token** and the shorter account identifier into **Codex account id**.
 
 > For more detail on what each provider measures, see [Providers](PROVIDERS.md).
@@ -102,7 +111,18 @@ If you only configured a single provider, a tap has no other provider to switch 
 
 ---
 
-## 6. Reconfigure / factory reset
+## 6. Alerts
+
+Set **Alert at %** in the setup portal (default `80`, `0` disables alerts). When the active provider's 5-hour **or** weekly window reaches that percentage, the device:
+
+- **blinks the onboard LED**, and
+- **flags the over-threshold row** on the dashboard — its label turns into `!5H`/`!7D` in the warning color.
+
+This lets you notice you're approaching a limit without staring at the screen.
+
+---
+
+## 7. Reconfigure / factory reset
 
 There is no partial-edit screen. If you need to change your Wi-Fi network, update a token, or add a provider, you must perform a full factory reset:
 
